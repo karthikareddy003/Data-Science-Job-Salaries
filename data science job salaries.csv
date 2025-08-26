@@ -1,0 +1,46 @@
+DROP TABLE IF EXISTS data_science_salaries;
+CREATE TABLE IF NOT EXISTS data_science_salaries (
+    job_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	job_title VARCHAR(100),
+	experience_level VARCHAR(20),
+	employment_type VARCHAR(20),
+	company_size VARCHAR(10),
+	company_location VARCHAR(50),
+	remote_ratio INT,
+	salary DECIMAL(10,2),
+	salary_currency VARCHAR(10)
+);
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public';
+INSERT INTO data_science_salaries
+(job_title, employment_type, experience_level, company_size, company_location, remote_ratio, salary, salary_currency)
+VALUES
+('Data Scientist', 'FT', 'Mid', 'Medium', 'USA', 100, 120000, 'USD'),
+('Machine Learning Engineer', 'FT', 'Senior', 'Large', 'UK', 50, 135000, 'GBP'),
+('Data Analyst', 'FT', 'Junior', 'Small', 'India', 0, 800000, 'INR'),
+('AI Reasearch', 'FT', 'Executive', 'Large', 'Germany', 100, 150000, 'EUR');
+SELECT job_title,
+       ROUND(AVG(salary), 2) AS avg_salary
+FROM data_science_salaries
+GROUP BY job_title
+ORDER BY avg_salary DESC;
+SELECT experience_level, job_title, salary
+FROM data_science_salaries ds
+WHERE salary = (
+    SELECT MAX(salary)
+	FROM data_science_salaries
+	WHERE experience_level = ds.experience_level
+);
+SELECT company_size, COUNT(*) AS job_count, ROUND(AVG(salary), 2) AS avg_salary
+FROM data_science_salaries
+GROUP BY company_size;
+SELECT
+    CASE
+	     WHEN remote_ratio = 0 THEN 'Onsite'
+		 WHEN remote_ratio = 50 THEN 'Hybrid'
+		 ELSE 'Remote'
+	END AS work_mode,
+	ROUND(AVG(salary), 2) AS avg_salary
+FROM data_science_salaries
+GROUP BY work_mode;
